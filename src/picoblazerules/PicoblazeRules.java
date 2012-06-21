@@ -20,11 +20,12 @@ public class PicoblazeRules {
         // TODO code application logic here
         List toto = new ArrayList<String>();
         
-        toto.add("his");
         toto.add("her");
+        toto.add("his");
         toto.add("she");
         
         Tree tree = new Tree(toto);
         tree.print();
+        //tree.getTable();
     }
 }
