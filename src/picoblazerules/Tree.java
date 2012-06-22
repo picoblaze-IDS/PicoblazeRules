@@ -5,10 +5,12 @@
 package picoblazerules;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 /**
  *
@@ -18,6 +20,7 @@ public class Tree {
     
     private List<String> words;
     private Map<String, Node> nodes;
+    private ArrayList<Character> table;
     private static final String NAME_ROOT = "";
     private static final int OPERATION = 0;
     private static final int CHARACTER = 1;
@@ -26,7 +29,10 @@ public class Tree {
 
     public Tree(List<String> words) {
         this.words = words;
-        this.nodes = new HashMap();
+        this.nodes = new HashMap<String, Node>();
+        this.table = new ArrayList<Character>();
+        
+        Collections.sort(this.words);
         
         this.createNodes();
         this.setNodesDictionary();
@@ -46,12 +52,12 @@ public class Tree {
     private void setNodesDictionary()
     {
         int i = 1;
-        for (Entry<String, Node> node : nodes.entrySet())
+        for (String key : this.getSortedKeyNodes())
         {
-            if (words.contains(node.getKey()))
+            if (words.contains(key))
             {
-                nodes.get(node.getKey()).setInDictionary(Boolean.TRUE);
-                nodes.get(node.getKey()).setId(i++);
+                nodes.get(key).setInDictionary(Boolean.TRUE);
+                nodes.get(key).setId(i++);
             }
         }
     }
@@ -91,56 +97,56 @@ public class Tree {
     
     public void print()
     {
-        for(Entry<String, Node> node : nodes.entrySet())
+        Node node;
+        
+        for(String key : this.getSortedKeyNodes())
         {
-            System.out.print("("+node.getKey()+")" + " ["+node.getValue().getId()+"]");
-            for (Entry<String, Node> next : node.getValue().getNext().entrySet())
+            node = this.nodes.get(key);
+            System.out.print("("+key+")" + " ["+node.getId()+"]");
+            for(String nextKey : this.getSortedKeyNextNodes(node))
             {
-                System.out.print(" {" + next.getKey() + "}");     
+                System.out.print(" {" + nextKey + "}");
             }
-            if (node.getValue().getSuffix() != null)
-                System.out.print("|" + node.getValue().getSuffix().getName() + "|");
+            if (node.getSuffix() != null)
+                System.out.print("|" + node.getSuffix().getName() + "|");
             System.out.println();
         }
     }
     
     public String getTable()
     {
-        ArrayList<Character> table = new ArrayList<Character>();
         Node currentNode;
         int nNode;
+        int startAddress;
+        int endAddress;
         
         nNode = 0;
-        for(Entry<String, Node> node : nodes.entrySet())
+        for(String key : this.getSortedKeyNodes())
         {
-            currentNode = node.getValue();
-            table.add(nNode + OPERATION, '0');
-            table.add(nNode + CHARACTER,'0');
-            table.add(nNode + ADDR1, '0');
-            table.add(nNode + ADDR2, currentNode.getId().toString().charAt(0));
+            startAddress = nNode;
+            currentNode = this.nodes.get(key);
+            this.table.add(nNode + OPERATION, '0');
+            this.table.add(nNode + CHARACTER,'0');
+            this.table.add(nNode + ADDR1, '0');
+            this.table.add(nNode + ADDR2, currentNode.getId().toString().charAt(0));
             nNode += 4;
-            nNode = addNextToTable(currentNode, table, nNode);
-            nNode = addSuffixToTable(currentNode, table, nNode);
-        }
-        for (int i = 0; i < table.size();i+=4)
-        {
-            System.out.print("[" + table.get(i + OPERATION));
-            System.out.print(" " + table.get(i + CHARACTER));
-            System.out.print(" " + table.get(i + ADDR1));
-            System.out.println(" " + table.get(i + ADDR2) + "]");
+            nNode = addNextToTable(currentNode, this.table, nNode);
+            nNode = addSuffixToTable(currentNode, this.table, nNode);
+            endAddress = nNode;
+            this.printRowTable(startAddress, endAddress, key);
         }
         return table.toString();
     }
     
     private int addNextToTable(Node currentNode, ArrayList<Character> table, int nNode)
     {
-        Map<String, Node> nexts;
+        Node next;
         
-        nexts = currentNode.getNext();
-        for(Entry<String, Node> next : nexts.entrySet())
+        for(String key : this.getSortedKeyNextNodes(currentNode))
         {
-            table.add(nNode + OPERATION, '1');  
-            table.add(nNode + CHARACTER, next.getValue().getName().charAt(next.getValue().getName().length() - 1));
+            next = currentNode.getNextNode(key);
+            table.add(nNode + OPERATION, '1');
+            table.add(nNode + CHARACTER, next.getName().charAt(next.getName().length() - 1));
             table.add(nNode + ADDR1, null);
             table.add(nNode + ADDR2, null);
             nNode += 4;
@@ -170,5 +176,33 @@ public class Tree {
         }
         nNode += 4;
         return nNode;
+    }
+
+    private TreeSet<String> getSortedKeyNodes() {
+        TreeSet<String> keys = new TreeSet<String>(this.nodes.keySet());
+        return keys;
+    }
+    
+    private TreeSet<String> getSortedKeyNextNodes(Node node) {
+        TreeSet<String> keys = new TreeSet<String>(node.getNext().keySet());
+        return keys;
+    }
+    
+    void printRowTable(int startAddress, int endAddress, String state){
+        if (state.equals("")) {
+            System.out.println("// Idle State");
+        }
+        else {
+            System.out.println("// state \""+state+"\"");
+        }
+        System.out.println("// addr \"0x"+Integer.toString(startAddress, 16)+"\"");
+        for (int i = startAddress; i < endAddress;i+=4)
+        {
+            System.out.print("[" + table.get(i + OPERATION));
+            System.out.print(" " + table.get(i + CHARACTER));
+            System.out.print(" " + table.get(i + ADDR1));
+            System.out.println(" " + table.get(i + ADDR2) + "]");
+        }
+        System.out.println();
     }
 }

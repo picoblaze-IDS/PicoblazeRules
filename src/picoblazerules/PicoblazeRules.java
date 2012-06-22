@@ -25,7 +25,7 @@ public class PicoblazeRules {
         toto.add("she");
         
         Tree tree = new Tree(toto);
-        tree.print();
-        //tree.getTable();
+        //tree.print();
+        System.out.println(tree.getTable());
     }
 }
