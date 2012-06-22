@@ -38,6 +38,8 @@ public class Tree {
         this.setNodesDictionary();
         this.setNodesNext();
         this.setNodesSuffix();
+        
+        this.buildTable();
     }
 
     private void createNodes()
@@ -115,27 +117,65 @@ public class Tree {
     
     public String getTable()
     {
+        return table.toString();
+    }
+    
+    private void buildTable() {
         Node currentNode;
         int nNode;
         int startAddress;
         int endAddress;
-        
+
         nNode = 0;
-        for(String key : this.getSortedKeyNodes())
-        {
+        for (String key : this.getSortedKeyNodes()) {
             startAddress = nNode;
             currentNode = this.nodes.get(key);
             this.table.add(nNode + OPERATION, '0');
-            this.table.add(nNode + CHARACTER,'0');
-            this.table.add(nNode + ADDR1, '0');
-            this.table.add(nNode + ADDR2, currentNode.getId().toString().charAt(0));
+            this.table.add(nNode + CHARACTER, '0');
+            this.table.add(nNode + ADDR1, (char) 0);
+            this.table.add(nNode + ADDR2, (char) currentNode.getId().byteValue());
             nNode += 4;
             nNode = addNextToTable(currentNode, this.table, nNode);
             nNode = addSuffixToTable(currentNode, this.table, nNode);
             endAddress = nNode;
-            this.printRowTable(startAddress, endAddress, key);
+
+            this.nodes.get(key).setStartAdress(startAddress);
+            this.nodes.get(key).setEndAddress(endAddress);
         }
-        return table.toString();
+
+        // We complete missing addresses
+        this.completeMissingAddresses();
+    }
+    
+    private void completeMissingAddresses(){
+        Node currentNode;
+        Character c;
+        int address;
+
+        for (String key : this.getSortedKeyNodes()) {
+            currentNode = this.nodes.get(key);
+            for (int i = currentNode.getStartAdress(); i < currentNode.getEndAddress(); i++) {
+                if (this.table.get(i) == null) {
+                    c = this.table.get(i - 1);
+
+                    if (this.nodes.get(currentNode.getName() + c) != null) {
+                        address = this.nodes.get(currentNode.getName() + c).getStartAdress();
+                    } else if (this.nodes.get(currentNode.getName()) != null && this.nodes.get(currentNode.getName()).getSuffix() != null) {
+                        address = this.nodes.get(currentNode.getName()).getSuffix().getStartAdress();
+                    } else {
+                        address = 0;
+                    }
+
+                    if (address < 255) {
+                        this.table.set(i, (char)0);
+                        this.table.set(i + 1, (char)address);
+                    } else {
+                        this.table.set(i, (char)(address >> 8));
+                        this.table.set(i + 1, (char)(address & 255));
+                    }
+                }
+            }
+        }
     }
     
     private int addNextToTable(Node currentNode, ArrayList<Character> table, int nNode)
@@ -171,8 +211,8 @@ public class Tree {
         }
         else
         {
-            table.add(nNode + ADDR1, '0');
-            table.add(nNode + ADDR2, '0');
+            table.add(nNode + ADDR1, (char)0);
+            table.add(nNode + ADDR2, (char)0);
         }
         nNode += 4;
         return nNode;
@@ -188,21 +228,44 @@ public class Tree {
         return keys;
     }
     
-    void printRowTable(int startAddress, int endAddress, String state){
-        if (state.equals("")) {
-            System.out.println("// Idle State");
+    
+    public String getFormattedTable() {
+        Node currentNode;
+        String result = "";
+        
+        for (String key : this.getSortedKeyNodes()) {
+            currentNode = this.nodes.get(key);
+            result += this.getSectionTable(currentNode);
+        }
+        return result;
+    }
+    
+    private String getSectionTable(Node node){
+        String result = "";
+        String suffix = "";
+        
+        if (node.getName().equals("")) {
+            result += "// Idle state\n";
         }
         else {
-            System.out.println("// state \""+state+"\"");
+            result += "// state \""+node.getName()+"\"\n";
         }
-        System.out.println("// addr \"0x"+Integer.toString(startAddress, 16)+"\"");
-        for (int i = startAddress; i < endAddress;i+=4)
+        result += "// addr \"0x"+Integer.toString(node.getStartAdress(), 16)+"\"\n";
+        for (int i = node.getStartAdress(); i < node.getEndAddress();i+=4)
         {
-            System.out.print("[" + table.get(i + OPERATION));
-            System.out.print(" " + table.get(i + CHARACTER));
-            System.out.print(" " + table.get(i + ADDR1));
-            System.out.println(" " + table.get(i + ADDR2) + "]");
+            result += table.get(i + OPERATION);
+            result += ", " + table.get(i + CHARACTER);
+            
+            if (table.get(i + OPERATION) == '0') {
+                suffix = "";
+            }
+            else{
+                suffix = "0x";
+            }
+            
+            result += ", " + (table.get(i + ADDR1) != null ? suffix + Integer.toString(table.get(i + ADDR1), 16) : "NULL");
+            result += ", " + (table.get(i + ADDR2) != null ? suffix + Integer.toString(table.get(i + ADDR2), 16) : "NULL") + "\n";
         }
-        System.out.println();
+        return result + "\n";
     }
 }

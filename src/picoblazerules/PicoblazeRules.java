@@ -26,6 +26,7 @@ public class PicoblazeRules {
         
         Tree tree = new Tree(toto);
         //tree.print();
-        System.out.println(tree.getTable());
+        //System.out.println(tree.getTable());
+        System.out.println(tree.getFormattedTable());
     }
 }

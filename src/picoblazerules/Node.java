@@ -18,6 +18,8 @@ public class Node {
     private Node suffix;
     private Boolean inDictionary;
     private Integer id;
+    private Integer startAdress;
+    private Integer endAddress;
 
     public Node(String name) {
         this.name = name;
@@ -25,6 +27,24 @@ public class Node {
         this.suffix = null;
         this.inDictionary = false;
         this.id = 0;
+        this.startAdress = 0;
+        this.endAddress = 0;
+    }
+
+    public Integer getEndAddress() {
+        return endAddress;
+    }
+
+    public void setEndAddress(Integer endAddress) {
+        this.endAddress = endAddress;
+    }
+
+    public Integer getStartAdress() {
+        return startAdress;
+    }
+
+    public void setStartAdress(Integer startAdress) {
+        this.startAdress = startAdress;
     }
 
     public void addNextNode(Node _node)
