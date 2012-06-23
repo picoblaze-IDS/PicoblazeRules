@@ -19,7 +19,7 @@ public class PicoblazeRules {
     public static void main(String[] args) {
         // TODO code application logic here
         List<String> words = new ArrayList<String>();
-        
+
         words.add("her");
         words.add("his");
         words.add("she");
@@ -28,6 +28,6 @@ public class PicoblazeRules {
         //tree.print();
         System.out.println(tree.getFormattedTable());
         System.out.println(tree.getTable());
-        System.out.print(tree.getBinaryTable());
+        tree.printBinaryTable();
     }
 }

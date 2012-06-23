@@ -20,7 +20,7 @@ public class Tree {
     
     private List<String> words;
     private Map<String, Node> nodes;
-    private ArrayList<Character> table;
+    private ArrayList<Byte> table;
     private static final String NAME_ROOT = "";
     private static final int OPERATION = 0;
     private static final int CHARACTER = 1;
@@ -34,7 +34,7 @@ public class Tree {
     public Tree(List<String> words) {
         this.words = words;
         this.nodes = new HashMap<String, Node>();
-        this.table = new ArrayList<Character>();
+        this.table = new ArrayList<Byte>();
         
         Collections.sort(this.words);
         
@@ -123,6 +123,8 @@ public class Tree {
     {
         String result = "";
         String suffix = "";
+        String hexaAddr1 = "";
+        String hexaAddr2 = "";
         Node node;
         int nRow = 0;
 
@@ -135,9 +137,9 @@ public class Tree {
                 result += (int) table.get(i + OPERATION);
 
                 if (table.get(i + OPERATION) == OPT_COMPARE) {
-                    result += ", " + (char) table.get(i + CHARACTER);
+                    result += ", " + (char)table.get(i + CHARACTER).intValue();
                 } else {
-                    result += ", " + (int) table.get(i + CHARACTER);
+                    result += ", " + table.get(i + CHARACTER);
                 }
 
                 if (table.get(i + OPERATION) == OPT_FIRST) {
@@ -148,20 +150,27 @@ public class Tree {
 
                 result += ", " + (table.get(i + ADDR1) != null ? suffix + Integer.toString(table.get(i + ADDR1), 16) : "NULL");
                 result += ", " + (table.get(i + ADDR2) != null ? suffix + Integer.toString(table.get(i + ADDR2), 16) : "NULL");
+                
+                if (suffix.equals("")) {
+                    hexaAddr1 = Integer.toString(table.get(i + ADDR1), 16);
+                    hexaAddr2 = Integer.toString(table.get(i + ADDR2), 16);
+                } else {
+                    hexaAddr1 = Integer.toString(table.get(i + ADDR1) >= 0 ? table.get(i + ADDR1) : 256 + table.get(i + ADDR1), 16);
+                    hexaAddr2 = Integer.toString(table.get(i + ADDR2) >= 0 ? table.get(i + ADDR2) : 256 + table.get(i + ADDR2), 16);
+                }
+                
                 nRow++;
             }
         }
         return result;
     }
     
-    public String getBinaryTable()
+    public void printBinaryTable()
     {
-        String result = "";
-
-        for (Character ch : this.table) {
-            result += ch;
+        for (Byte ch : this.table) {
+            System.out.write(ch);
         }
-        return result;
+        System.out.flush();
     }
     
     private void buildTable() {
@@ -174,10 +183,10 @@ public class Tree {
         for (String key : this.getSortedKeyNodes()) {
             startAddress = nNode;
             currentNode = this.nodes.get(key);
-            this.table.add(nNode + OPERATION, (char) OPT_FIRST);
-            this.table.add(nNode + CHARACTER, (char) 0);
-            this.table.add(nNode + ADDR1, (char) 0);
-            this.table.add(nNode + ADDR2, (char) currentNode.getId().byteValue());
+            this.table.add(nNode + OPERATION, (byte)OPT_FIRST);
+            this.table.add(nNode + CHARACTER, (byte)0);
+            this.table.add(nNode + ADDR1, (byte)0);
+            this.table.add(nNode + ADDR2, currentNode.getId().byteValue());
             nNode += 4;
             nNode = addNextToTable(currentNode, this.table, nNode);
             nNode = addSuffixToTable(currentNode, this.table, nNode);
@@ -193,7 +202,7 @@ public class Tree {
     
     private void completeMissingAddresses(){
         Node currentNode;
-        Character c;
+        Byte c;
         int address;
 
         for (String key : this.getSortedKeyNodes()) {
@@ -201,36 +210,40 @@ public class Tree {
             for (int i = currentNode.getStartAdress(); i < currentNode.getEndAddress(); i++) {
                 if (this.table.get(i) == null) {
                     c = this.table.get(i - 1);
-
-                    if (this.nodes.get(currentNode.getName() + c) != null) {
-                        address = this.nodes.get(currentNode.getName() + c).getStartAdress();
+                    if (c == null) {
+                        address = -1;
+                    }
+                    else if (this.nodes.get(currentNode.getName() + (char)c.intValue()) != null) {
+                        address = this.nodes.get(currentNode.getName() + (char)c.intValue()).getStartAdress();
                     } else if (this.nodes.get(currentNode.getName()) != null && this.nodes.get(currentNode.getName()).getSuffix() != null) {
                         address = this.nodes.get(currentNode.getName()).getSuffix().getStartAdress();
                     } else {
-                        address = 0;
+                        address = -1;
                     }
 
-                    if (address < 255) {
-                        this.table.set(i, (char)0);
-                        this.table.set(i + 1, (char)address);
-                    } else {
-                        this.table.set(i, (char)(address >> 8));
-                        this.table.set(i + 1, (char)(address & 255));
+                    if (address > 0) {
+                        if (address < 255) {
+                            this.table.set(i, (byte) 0);
+                            this.table.set(i + 1, (byte) address);
+                        } else {
+                            this.table.set(i, (byte) (address >> 8));
+                            this.table.set(i + 1, (byte) (address & 255));
+                        }
                     }
                 }
             }
         }
     }
     
-    private int addNextToTable(Node currentNode, ArrayList<Character> table, int nNode)
+    private int addNextToTable(Node currentNode, ArrayList<Byte> table, int nNode)
     {
         Node next;
         
         for(String key : this.getSortedKeyNextNodes(currentNode))
         {
             next = currentNode.getNextNode(key);
-            table.add(nNode + OPERATION, (char) OPT_COMPARE);
-            table.add(nNode + CHARACTER, next.getName().charAt(next.getName().length() - 1));
+            table.add(nNode + OPERATION, (byte) OPT_COMPARE);
+            table.add(nNode + CHARACTER, (byte)next.getName().charAt(next.getName().length() - 1));
             table.add(nNode + ADDR1, null);
             table.add(nNode + ADDR2, null);
             nNode += 4;
@@ -238,16 +251,16 @@ public class Tree {
         return nNode;
     }
     
-    private int addSuffixToTable(Node currentNode, ArrayList<Character> table, int nNode)
+    private int addSuffixToTable(Node currentNode, ArrayList<Byte> table, int nNode)
     {
         Node suffix;
         
         suffix = currentNode.getSuffix();
         if (currentNode.getName().equals(NAME_ROOT))
-            table.add(nNode + OPERATION, (char) OPT_GOTO_AND_DROP);
+            table.add(nNode + OPERATION, (byte) OPT_GOTO_AND_DROP);
         else
-            table.add(nNode + OPERATION, (char) OPT_GOTO_AND_RETRY);
-        table.add(nNode + CHARACTER, (char) 0);
+            table.add(nNode + OPERATION, (byte) OPT_GOTO_AND_RETRY);
+        table.add(nNode + CHARACTER, (byte) 0);
         if (suffix != null && !suffix.getName().equals(NAME_ROOT))
         {
             table.add(nNode + ADDR1, null);
@@ -255,8 +268,8 @@ public class Tree {
         }
         else
         {
-            table.add(nNode + ADDR1, (char)0);
-            table.add(nNode + ADDR2, (char)0);
+            table.add(nNode + ADDR1, (byte)0);
+            table.add(nNode + ADDR2, (byte)0);
         }
         nNode += 4;
         return nNode;
@@ -287,6 +300,8 @@ public class Tree {
     private String getSectionTable(Node node){
         String result = "";
         String suffix = "";
+        String hexaAddr1 = "";
+        String hexaAddr2 = "";
 
         if (node.getName().equals("")) {
             result += "// Idle state\n";
@@ -300,7 +315,7 @@ public class Tree {
             result += (int) table.get(currentAddress + OPERATION);
 
             if (table.get(currentAddress + OPERATION) == OPT_COMPARE) {
-                result += ", " + (char) table.get(currentAddress + CHARACTER);
+                result += ", " + (char)table.get(currentAddress + CHARACTER).intValue();
             } else {
                 result += ", " + (int) table.get(currentAddress + CHARACTER);
             }
@@ -311,8 +326,17 @@ public class Tree {
                 suffix = "0x";
             }
 
-            result += ", " + (table.get(currentAddress + ADDR1) != null ? suffix + Integer.toString(table.get(currentAddress + ADDR1), 16) : "NULL");
-            result += ", " + (table.get(currentAddress + ADDR2) != null ? suffix + Integer.toString(table.get(currentAddress + ADDR2), 16) : "NULL") + "\n";
+         
+            if (suffix.equals("")) {
+                hexaAddr1 = Integer.toString(table.get(currentAddress + ADDR1), 16);
+                hexaAddr2 = Integer.toString(table.get(currentAddress + ADDR2), 16);
+            } else {
+                hexaAddr1 = Integer.toString(table.get(currentAddress + ADDR1) >= 0 ? table.get(currentAddress + ADDR1) : 256 + table.get(currentAddress + ADDR1), 16);
+                hexaAddr2 = Integer.toString(table.get(currentAddress + ADDR2) >= 0 ? table.get(currentAddress + ADDR2) : 256 + table.get(currentAddress + ADDR2), 16);
+            }
+
+            result += ", " + (table.get(currentAddress + ADDR1) != null ? suffix + hexaAddr1 : "NULL");
+            result += ", " + (table.get(currentAddress + ADDR2) != null ? suffix + hexaAddr2 : "NULL") + "\n";
         }
         return result + "\n";
     }
