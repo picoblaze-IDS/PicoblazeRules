@@ -26,6 +26,10 @@ public class Tree {
     private static final int CHARACTER = 1;
     private static final int ADDR1 = 2;
     private static final int ADDR2 = 3;
+    private static final int OPT_FIRST = 0; // first row of a state, which may indicate a string match
+    private static final int OPT_COMPARE = 1; // compare current character
+    private static final int OPT_GOTO_AND_DROP = 2; // goto next1:next0 and drop current character
+    private static final int OPT_GOTO_AND_RETRY = 3; // goto next1:next0 and retry with current character
 
     public Tree(List<String> words) {
         this.words = words;
@@ -117,7 +121,47 @@ public class Tree {
     
     public String getTable()
     {
-        return table.toString();
+        String result = "";
+        String suffix = "";
+        Node node;
+        int nRow = 0;
+
+        for (String key : this.getSortedKeyNodes()) {
+            node = this.nodes.get(key);
+            for (int i = node.getStartAdress(); i < node.getEndAddress(); i += 4) {
+                if (nRow != 0) {
+                    result += ", ";
+                }
+                result += (int) table.get(i + OPERATION);
+
+                if (table.get(i + OPERATION) == OPT_COMPARE) {
+                    result += ", " + (char) table.get(i + CHARACTER);
+                } else {
+                    result += ", " + (int) table.get(i + CHARACTER);
+                }
+
+                if (table.get(i + OPERATION) == OPT_FIRST) {
+                    suffix = "";
+                } else {
+                    suffix = "0x";
+                }
+
+                result += ", " + (table.get(i + ADDR1) != null ? suffix + Integer.toString(table.get(i + ADDR1), 16) : "NULL");
+                result += ", " + (table.get(i + ADDR2) != null ? suffix + Integer.toString(table.get(i + ADDR2), 16) : "NULL");
+                nRow++;
+            }
+        }
+        return result;
+    }
+    
+    public String getBinaryTable()
+    {
+        String result = "";
+
+        for (Character ch : this.table) {
+            result += ch;
+        }
+        return result;
     }
     
     private void buildTable() {
@@ -130,8 +174,8 @@ public class Tree {
         for (String key : this.getSortedKeyNodes()) {
             startAddress = nNode;
             currentNode = this.nodes.get(key);
-            this.table.add(nNode + OPERATION, '0');
-            this.table.add(nNode + CHARACTER, '0');
+            this.table.add(nNode + OPERATION, (char) OPT_FIRST);
+            this.table.add(nNode + CHARACTER, (char) 0);
             this.table.add(nNode + ADDR1, (char) 0);
             this.table.add(nNode + ADDR2, (char) currentNode.getId().byteValue());
             nNode += 4;
@@ -185,7 +229,7 @@ public class Tree {
         for(String key : this.getSortedKeyNextNodes(currentNode))
         {
             next = currentNode.getNextNode(key);
-            table.add(nNode + OPERATION, '1');
+            table.add(nNode + OPERATION, (char) OPT_COMPARE);
             table.add(nNode + CHARACTER, next.getName().charAt(next.getName().length() - 1));
             table.add(nNode + ADDR1, null);
             table.add(nNode + ADDR2, null);
@@ -200,10 +244,10 @@ public class Tree {
         
         suffix = currentNode.getSuffix();
         if (currentNode.getName().equals(NAME_ROOT))
-            table.add(nNode + OPERATION, '2');
+            table.add(nNode + OPERATION, (char) OPT_GOTO_AND_DROP);
         else
-            table.add(nNode + OPERATION, '3');
-        table.add(nNode + CHARACTER,'0');
+            table.add(nNode + OPERATION, (char) OPT_GOTO_AND_RETRY);
+        table.add(nNode + CHARACTER, (char) 0);
         if (suffix != null && !suffix.getName().equals(NAME_ROOT))
         {
             table.add(nNode + ADDR1, null);
@@ -243,28 +287,32 @@ public class Tree {
     private String getSectionTable(Node node){
         String result = "";
         String suffix = "";
-        
+
         if (node.getName().equals("")) {
             result += "// Idle state\n";
+        } else {
+            result += "// state \"" + node.getName() + "\"\n";
         }
-        else {
-            result += "// state \""+node.getName()+"\"\n";
-        }
-        result += "// addr \"0x"+Integer.toString(node.getStartAdress(), 16)+"\"\n";
-        for (int i = node.getStartAdress(); i < node.getEndAddress();i+=4)
-        {
-            result += table.get(i + OPERATION);
-            result += ", " + table.get(i + CHARACTER);
-            
-            if (table.get(i + OPERATION) == '0') {
-                suffix = "";
+
+        for (int currentAddress = node.getStartAdress();
+                currentAddress < node.getEndAddress(); currentAddress += 4) {
+            result += "/* 0x" + Integer.toString(currentAddress, 16) + " */ ";
+            result += (int) table.get(currentAddress + OPERATION);
+
+            if (table.get(currentAddress + OPERATION) == OPT_COMPARE) {
+                result += ", " + (char) table.get(currentAddress + CHARACTER);
+            } else {
+                result += ", " + (int) table.get(currentAddress + CHARACTER);
             }
-            else{
+
+            if (table.get(currentAddress + OPERATION) == OPT_FIRST) {
+                suffix = "";
+            } else {
                 suffix = "0x";
             }
-            
-            result += ", " + (table.get(i + ADDR1) != null ? suffix + Integer.toString(table.get(i + ADDR1), 16) : "NULL");
-            result += ", " + (table.get(i + ADDR2) != null ? suffix + Integer.toString(table.get(i + ADDR2), 16) : "NULL") + "\n";
+
+            result += ", " + (table.get(currentAddress + ADDR1) != null ? suffix + Integer.toString(table.get(currentAddress + ADDR1), 16) : "NULL");
+            result += ", " + (table.get(currentAddress + ADDR2) != null ? suffix + Integer.toString(table.get(currentAddress + ADDR2), 16) : "NULL") + "\n";
         }
         return result + "\n";
     }

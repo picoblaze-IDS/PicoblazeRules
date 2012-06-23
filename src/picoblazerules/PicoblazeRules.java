@@ -18,15 +18,16 @@ public class PicoblazeRules {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        List toto = new ArrayList<String>();
+        List<String> words = new ArrayList<String>();
         
-        toto.add("her");
-        toto.add("his");
-        toto.add("she");
+        words.add("her");
+        words.add("his");
+        words.add("she");
         
-        Tree tree = new Tree(toto);
+        Tree tree = new Tree(words);
         //tree.print();
-        //System.out.println(tree.getTable());
         System.out.println(tree.getFormattedTable());
+        System.out.println(tree.getTable());
+        System.out.print(tree.getBinaryTable());
     }
 }
