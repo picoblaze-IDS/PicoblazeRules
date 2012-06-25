@@ -99,6 +99,7 @@ public final class Parser {
         catch(FileNotFoundException exc)
         {
             System.out.println("Error: File not found.");
+            System.exit(0);
         }
         for (int i = 0; i < nRules; i++)
             rules.add(new Rule(actions.get(i), protocols.get(i), sourcesIp.get(i), sourcesPort.get(i), directions.get(i), destsIp.get(i), destsPort.get(i), options.get(i)));
