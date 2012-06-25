@@ -1,0 +1,2 @@
+alert tcp any any -> 192.168.1.0/24 111 (content:"mount"; msg: "mountd access";)
+alert tcp any any -> 192.168.1.0/24 21 (content: "USER root"; msg: "FTP root login";)

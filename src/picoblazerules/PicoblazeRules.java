@@ -22,7 +22,12 @@ public class PicoblazeRules {
         List<Rule>  rules;
         String word;
         
-        Parser parser = new Parser("rules.txt");
+        if (args.length == 0)
+        {
+            System.out.println("Please specify a rules file.");
+            System.exit(0);
+        }
+        Parser parser = new Parser(args[0]);
         rules = parser.getRules();
         for (Rule rule : rules)
         {
