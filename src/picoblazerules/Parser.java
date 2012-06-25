@@ -27,7 +27,8 @@ public final class Parser {
     List<String>    directions;
     List<String>    destsIp;
     List<String>    destsPort;
-    List<Map>       options;
+    List<Map<String, String>>       options;
+    List<Rule>      rules;
     int             nRules;
     String          fileName;
     String          fileLine = "";
@@ -58,11 +59,14 @@ public final class Parser {
             directions = new ArrayList<String>();
             destsIp = new ArrayList<String>();
             destsPort = new ArrayList<String>();
-            options = new ArrayList<Map>();
+            options = new ArrayList<Map<String, String>>();
+            rules = new ArrayList<Rule>();
 
             buffer = new BufferedReader(new FileReader(_fileName));
             while ((line = buffer.readLine()) != null)
             {
+                if (line.trim().isEmpty())
+                    continue;
                 int section = -1;
                 for (String retval: line.split(" ", 8))
                 {
@@ -96,12 +100,16 @@ public final class Parser {
         {
             System.out.println("Error: File not found.");
         }
+        for (int i = 0; i < nRules; i++)
+            rules.add(new Rule(actions.get(i), protocols.get(i), sourcesIp.get(i), sourcesPort.get(i), directions.get(i), destsIp.get(i), destsPort.get(i), options.get(i)));
     }
-    
+
     public Map<String, String> parseOption(String options)
     {
-        Map<String, String> optionMap = new HashMap();
+        Map<String, String> optionMap = new HashMap<String, String>();
         
+        if (options.isEmpty())
+            return (null);
         options = options.substring(1, options.length()-1);
         for (String option: options.split(";"))
         {
@@ -120,29 +128,7 @@ public final class Parser {
         }
         return (optionMap);
     }
-    
-    public void print()
-    {
-        Map<String, String> optionsMap;
-        for (int i = 0; i < getnRules(); i++)
-        {
-            System.out.println("[Rules " + i + "]\n"
-                    + "Action = [" + actions.get(i) + "]\n"
-                    + "Protocol = [" + protocols.get(i) + "]\n"
-                    + "Source Ip = [" + sourcesIp.get(i) + "]\n"
-                    + "Source Port = [" + sourcesPort.get(i) + "]\n"
-                    + "Direction = [" + directions.get(i) + "]\n"
-                    + "Destination IP = [" + destsIp.get(i) + "]\n"
-                    + "Destination Port = [" + destsPort.get(i) + "]");
-            optionsMap = options.get(i);
-            for (Entry<String, String> option : optionsMap.entrySet())
-            {
-                System.out.print("Option = " + option.getKey() + ":" + option.getValue() + "\n");
-            }
-            System.out.println("=========\n");
-        }
-    }
-    
+
     public List<String> getAction() {
         return actions;
     }
@@ -191,11 +177,11 @@ public final class Parser {
         this.fileName = fileName;
     }
     
-    public List<Map> getOption() {
+    public List<Map<String, String>> getOption() {
         return options;
     }
 
-    public void setOption(List<Map> options) {
+    public void setOption(List<Map<String, String>> options) {
         this.options = options;
     }
 
@@ -229,5 +215,13 @@ public final class Parser {
 
     public void setnRules(int nRules) {
         this.nRules = nRules;
+    }
+
+    public List<Rule> getRules() {
+        return rules;
+    }
+
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
     }
 }

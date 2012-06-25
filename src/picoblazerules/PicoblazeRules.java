@@ -5,6 +5,8 @@
 package picoblazerules;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,16 +18,21 @@ public class PicoblazeRules {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        // TODO code application logic here
-        Parser parser = new Parser("rules.txt");
-        parser.print();
         List<String> words = new ArrayList<String>();
-
-        words.add("her");
-        words.add("his");
-        words.add("she");
+        List<Rule>  rules;
+        String word;
         
+        Parser parser = new Parser("rules.txt");
+        rules = parser.getRules();
+        for (Rule rule : rules)
+        {
+            if (rule.getOptions() != null && (word = rule.getOptions().get("content")) != null)
+            words.add(word);
+        }
+
         Tree tree = new Tree(words);
+        
+
         //tree.print();
         System.out.println(tree.getFormattedTable());
         System.out.println(tree.getTable());
