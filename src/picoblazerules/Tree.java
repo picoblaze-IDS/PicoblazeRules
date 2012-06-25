@@ -24,6 +24,10 @@ public class Tree {
     private static final int ADDR1 = 2;
     private static final int ADDR2 = 3;
 
+    /**
+     * 
+     * @param words
+     */
     public Tree(List<String> words) {
         this.words = words;
         this.nodes = new HashMap();
@@ -33,7 +37,10 @@ public class Tree {
         this.setNodesNext();
         this.setNodesSuffix();
     }
-
+    
+    /**
+     * 
+     */
     private void createNodes()
     {
         for (String word : words)
@@ -43,6 +50,9 @@ public class Tree {
         }
     }
     
+    /**
+     * 
+     */
     private void setNodesDictionary()
     {
         int i = 1;
@@ -56,6 +66,9 @@ public class Tree {
         }
     }
     
+    /**
+     * 
+     */
     private void setNodesNext()
     {
         for (Entry<String, Node> node : nodes.entrySet())
@@ -69,6 +82,9 @@ public class Tree {
         }
     }
     
+    /**
+     * 
+     */
     private void setNodesSuffix()
     {
         for (Entry<String, Node> node : nodes.entrySet())
@@ -89,6 +105,9 @@ public class Tree {
         }
     }
     
+    /**
+     * 
+     */
     public void print()
     {
         for(Entry<String, Node> node : nodes.entrySet())
@@ -104,6 +123,10 @@ public class Tree {
         }
     }
     
+    /**
+     * 
+     * @return
+     */
     public String getTable()
     {
         ArrayList<Character> table = new ArrayList<Character>();
@@ -131,7 +154,10 @@ public class Tree {
         }
         return table.toString();
     }
-    
+
+    /**
+     * 
+     */
     private int addNextToTable(Node currentNode, ArrayList<Character> table, int nNode)
     {
         Map<String, Node> nexts;
@@ -148,6 +174,9 @@ public class Tree {
         return nNode;
     }
     
+    /**
+     * 
+     */
     private int addSuffixToTable(Node currentNode, ArrayList<Character> table, int nNode)
     {
         Node suffix;
