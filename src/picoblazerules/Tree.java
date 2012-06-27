@@ -320,6 +320,43 @@ public class Tree {
         return result;
     }
     
+    public String getInstructionTable()
+    {
+        String result = "";
+        String suffix = "$";
+        String hexaAddr1 = "";
+        String hexaAddr2 = "";
+        Node node;
+        int nRow = 0;
+        int currentAdress = 0;
+
+        for (String key : this.getSortedKeyNodes()) {
+            node = this.nodes.get(key);
+            for (currentAdress = node.getStartAdress(); currentAdress < node.getEndAddress(); currentAdress += 4) {
+                if (nRow != 0 && nRow % 4 != 0) {
+                    result += ", ";
+                }
+                else
+                    result += "rules_rom" + currentAdress + " DSROM " + suffix + Integer.toString(currentAdress, 16) + ", ";
+                result += suffix + Integer.toString(table.get(currentAdress + OPERATION), 16) + ", ";
+
+                result += suffix + Integer.toString(table.get(currentAdress + CHARACTER), 16) + ", ";
+
+                hexaAddr1 = Integer.toString(table.get(currentAdress + ADDR1) >= 0 ? table.get(currentAdress + ADDR1) : 256 + table.get(currentAdress + ADDR1), 16);
+                hexaAddr2 = Integer.toString(table.get(currentAdress + ADDR2) >= 0 ? table.get(currentAdress + ADDR2) : 256 + table.get(currentAdress + ADDR2), 16);
+
+                result += (table.get(currentAdress + ADDR1) != null ? suffix + hexaAddr1 : "NULL") + ", ";
+                result += (table.get(currentAdress + ADDR2) != null ? suffix + hexaAddr2 : "NULL");
+                nRow++;
+                if (nRow % 4 == 0)
+                    result += "\n";
+            }
+        }
+        for (int i = 0; i < (currentAdress % 16); i++)
+            result += ", " + suffix + "0";
+        return result;
+    }
+    
     private String getSectionTable(Node node){
         String result = "";
         String suffix = "";
