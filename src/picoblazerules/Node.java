@@ -23,7 +23,7 @@ public class Node {
 
     public Node(String name) {
         this.name = name;
-        this.next = new HashMap();
+        this.next = new HashMap<String, Node>();
         this.suffix = null;
         this.inDictionary = false;
         this.id = 0;

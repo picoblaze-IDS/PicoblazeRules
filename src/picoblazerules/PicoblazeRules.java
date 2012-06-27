@@ -33,8 +33,9 @@ public class PicoblazeRules {
         {
             if (rule.getOptions() != null && (word = rule.getOptions().get("content")) != null)
             words.add(word);
+            rule.print();
         }
-
+        
         Tree tree = new Tree(words);
         
 
@@ -42,6 +43,6 @@ public class PicoblazeRules {
         //System.out.println(tree.getFormattedTable());
         //System.out.println(tree.getTable());
         //tree.printBinaryTable();
-        System.out.println(tree.getInstructionTable());
+        //System.out.println(tree.getInstructionTable());
     }
 }
