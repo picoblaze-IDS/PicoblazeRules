@@ -357,6 +357,60 @@ public class Tree {
         return result;
     }
     
+    
+    public String getVhdlTable() {
+        String result = "";
+        String row = "";
+        Node node;
+        int nRow = 0;
+        int currentAdress = 0;
+
+        for (String key : this.getSortedKeyNodes()) {
+            node = this.nodes.get(key);
+            for (currentAdress = node.getStartAdress(); currentAdress < node.getEndAddress(); currentAdress += 4) {
+                if (!(nRow != 0 && nRow % 8 != 0)) {
+                    result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " : bit_vector := X\"";
+                }
+                row += String.format("%02x", table.get(currentAdress + OPERATION)).toUpperCase();
+                row += String.format("%02x", table.get(currentAdress + CHARACTER)).toUpperCase();
+                row += String.format("%02x", table.get(currentAdress + ADDR1)).toUpperCase();
+                row += String.format("%02x", table.get(currentAdress + ADDR2)).toUpperCase();
+                nRow++;
+                if (nRow % 8 == 0) {
+                    result += this.invertRow(row) + "\";\n";
+                    row = "";
+                }
+            }
+        }
+
+        while (currentAdress % 32 != 0) {
+            row += "00000000";
+            currentAdress += 4;
+        }
+        result += this.invertRow(row) + "\";\n";
+
+        // We fill the rest of the RAM until 3F (63)
+        while (currentAdress <= 63 * 32) {
+            row = "";
+            result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " : bit_vector := X\"";
+            row = String.format("%064x", 0);
+            result += row + "\";\n";
+            currentAdress += 32;
+        }
+
+        return result;
+    }
+    
+    private String invertRow(String row) {
+        String result = "";
+        int i = 0;
+        while ((row.length() - 2 - i) >= 0) {
+            result += row.substring(row.length() - 2 - i, row.length() - i);
+            i += 2;
+        }
+        return result;
+    }
+    
     private String getSectionTable(Node node){
         String result = "";
         String suffix = "";
