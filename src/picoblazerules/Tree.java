@@ -369,7 +369,7 @@ public class Tree {
             node = this.nodes.get(key);
             for (currentAdress = node.getStartAdress(); currentAdress < node.getEndAddress(); currentAdress += 4) {
                 if (!(nRow != 0 && nRow % 8 != 0)) {
-                    result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " : bit_vector := X\"";
+                    result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " => X\"";
                 }
                 row += String.format("%02x", table.get(currentAdress + OPERATION)).toUpperCase();
                 row += String.format("%02x", table.get(currentAdress + CHARACTER)).toUpperCase();
@@ -377,7 +377,7 @@ public class Tree {
                 row += String.format("%02x", table.get(currentAdress + ADDR2)).toUpperCase();
                 nRow++;
                 if (nRow % 8 == 0) {
-                    result += this.invertRow(row) + "\";\n";
+                    result += this.invertRow(row) + "\",\n";
                     row = "";
                 }
             }
@@ -387,18 +387,20 @@ public class Tree {
             row += "00000000";
             currentAdress += 4;
         }
-        result += this.invertRow(row) + "\";\n";
+        result += this.invertRow(row) + "\",\n";
 
         // We fill the rest of the RAM until 3F (63)
+        /*
         while (currentAdress <= 63 * 32) {
-            row = "";
-            result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " : bit_vector := X\"";
-            row = String.format("%064x", 0);
-            result += row + "\";\n";
-            currentAdress += 32;
+        row = "";
+        result += "INIT_" + String.format("%02x", currentAdress / 32).toUpperCase() + " => X\"";
+        row = String.format("%064x", 0);
+        result += row + "\",\n";
+        currentAdress += 32;
         }
+         */
 
-        return result;
+        return result.substring(0, result.length() - 2);
     }
     
     private String invertRow(String row) {
