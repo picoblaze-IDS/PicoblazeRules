@@ -27,7 +27,7 @@ public final class Parser {
     List<String>    destsIp;
     List<String>    destsPort;
     List<Map<String, String>>       options;
-    List<Rule>      rules;
+    ArrayList<Rule>      rules;
     int             nRules;
     String          fileName;
     String          fileLine = "";
@@ -71,9 +71,9 @@ public final class Parser {
                 {
                     section++;
                     switch (section){
-                        case ACTION: actions.add(retval);
+                        case ACTION: actions.add(retval.toLowerCase());
                             break;
-                        case PROTOCOL: protocols.add(retval);
+                        case PROTOCOL: protocols.add(retval.toLowerCase());
                             break;
                         case SRCIP: sourcesIp.add(retval);
                             break;
@@ -122,7 +122,7 @@ public final class Parser {
                 if (i % 2 == 0)
                     key = value;
                 else
-                    optionMap.put(key, value);
+                    optionMap.put(key.toLowerCase(), value.toLowerCase());
                 i++;
             }
         }
@@ -217,11 +217,11 @@ public final class Parser {
         this.nRules = nRules;
     }
 
-    public List<Rule> getRules() {
+    public ArrayList<Rule> getRules() {
         return rules;
     }
 
-    public void setRules(List<Rule> rules) {
+    public void setRules(ArrayList<Rule> rules) {
         this.rules = rules;
     }
 }

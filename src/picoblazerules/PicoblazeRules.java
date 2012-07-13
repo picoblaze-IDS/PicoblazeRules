@@ -13,13 +13,12 @@ import java.util.List;
  * @author dc386
  */
 public class PicoblazeRules {
-
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        List<String> words = new ArrayList<String>();
-        List<Rule>  rules;
+        ArrayList<Rule>  rules = new ArrayList<Rule>();
         String word;
         
         if (args.length == 0)
@@ -29,18 +28,13 @@ public class PicoblazeRules {
         }
         Parser parser = new Parser(args[0]);
         rules = parser.getRules();
-        for (Rule rule : rules)
-        {
-            if (rule.getOptions() != null && (word = rule.getOptions().get("content")) != null)
-            words.add(word);
-            rule.print();
-        }
+        Tree tree = new Tree(rules);
+        //rule.print();
         
-        Tree tree = new Tree(words);
         
 
         //tree.print();
-        //System.out.println(tree.getFormattedTable());
+        System.out.println(tree.getFormattedTable());
         //System.out.println(tree.getTable());
         //tree.printBinaryTable();
         //System.out.println(tree.getInstructionTable());

@@ -21,7 +21,9 @@ public class Tree {
     private List<String> words;
     private Map<String, Node> nodes;
     private ArrayList<Byte> table;
+    private ArrayList<Rule> rules;
     private static final String NAME_ROOT = "";
+    static final String CONTENT = "content";
     private static final int OPERATION = 0;
     private static final int CHARACTER = 1;
     private static final int ADDR1 = 2;
@@ -30,15 +32,27 @@ public class Tree {
     private static final int OPT_COMPARE = 1; // compare current character
     private static final int OPT_GOTO_AND_DROP = 2; // goto next1:next0 and drop current character
     private static final int OPT_GOTO_AND_RETRY = 3; // goto next1:next0 and retry with current character
+    private static final int OPT_NETWORK = 4; // compare Protocol where 'protocol' is 0 = any, 1 = TCP, 2 = UDP, following by the IP FROM Range (8 Bytes), PORT FROM Range (4 Bytes), IP TO Range(8 Bytes), PORT TO Range(4 Bytes)
 
     /**
      * 
      * @param words
      */
-    public Tree(List<String> words) {
-        this.words = words;
+    public Tree(ArrayList<Rule> rules) {
+        
+        String word;
         this.nodes = new HashMap<String, Node>();
         this.table = new ArrayList<Byte>();
+        this.rules = new ArrayList<Rule>();
+        this.words = new ArrayList<String>();
+        
+        this.rules = rules;
+        
+        for (Rule rule : this.rules)
+        {
+            if (rule.getOptions() != null && (word = rule.getOptions().get(CONTENT)) != null)
+                this.words.add(word);
+        }
         
         Collections.sort(this.words);
         
@@ -210,8 +224,15 @@ public class Tree {
             this.table.add(nNode + CHARACTER, (byte)0);
             this.table.add(nNode + ADDR1, (byte)0);
             this.table.add(nNode + ADDR2, currentNode.getId().byteValue());
+            
             nNode += 4;
             nNode = addNextToTable(currentNode, this.table, nNode);
+            if (currentNode.getId() > 0)
+            {
+                for (Rule rule : rules)
+                    if (rule.getOptions().get(CONTENT).equals(currentNode.getName()))
+                        nNode = this.addNetworkConfig(nNode, rule);
+            }
             nNode = addSuffixToTable(currentNode, this.table, nNode);
             endAddress = nNode;
 
@@ -222,6 +243,61 @@ public class Tree {
         // We complete missing addresses
         this.completeMissingAddresses();
     }
+    
+    private int addNetworkConfig(int nNode, Rule rule)
+    {
+        nNode = addProtocol(nNode, rule);
+        nNode = addIpFrom(nNode, rule);
+        nNode = addPortFrom(nNode, rule);
+        nNode = addIpTo(nNode, rule);
+        nNode = addPortTo(nNode, rule);
+        return nNode;
+    }
+    
+    private int addProtocol(int nNode, Rule rule)
+    {
+        this.table.add(nNode + OPERATION, (byte)OPT_NETWORK);
+        this.table.add(nNode + CHARACTER, (byte)0);
+        this.table.add(nNode + ADDR1, (byte)0);
+        this.table.add(nNode + ADDR2, (byte)rule.getProtocolNumber());
+        nNode +=4;
+        return (nNode);
+    }
+    
+    private int addIpFrom(int nNode, Rule rule)
+    {
+        byte[] ipRange = new byte[8];
+        ipRange = rule.getIpFromRange();
+        this.table.add(nNode + OPERATION, ipRange[0]);
+        this.table.add(nNode + CHARACTER, ipRange[1]);
+        this.table.add(nNode + ADDR1, ipRange[2]);
+        this.table.add(nNode + ADDR2, ipRange[3]);
+        nNode +=4;
+        this.table.add(nNode + OPERATION, ipRange[4]);
+        this.table.add(nNode + CHARACTER, ipRange[5]);
+        this.table.add(nNode + ADDR1, ipRange[6]);
+        this.table.add(nNode + ADDR2, ipRange[7]);
+        nNode +=4;
+        return (nNode);
+    }
+
+        private int addIpTo(int nNode, Rule rule)
+    {
+        byte[] ipRange = new byte[8];
+        ipRange = rule.getIpToRange();
+        this.table.add(nNode + OPERATION, ipRange[0]);
+        this.table.add(nNode + CHARACTER, ipRange[1]);
+        this.table.add(nNode + ADDR1, ipRange[2]);
+        this.table.add(nNode + ADDR2, ipRange[3]);
+        nNode +=4;
+        this.table.add(nNode + OPERATION, ipRange[4]);
+        this.table.add(nNode + CHARACTER, ipRange[5]);
+        this.table.add(nNode + ADDR1, ipRange[6]);
+        this.table.add(nNode + ADDR2, ipRange[7]);
+        nNode +=4;
+        return (nNode);
+    }
+
     
     private void completeMissingAddresses(){
         Node currentNode;
@@ -428,15 +504,19 @@ public class Tree {
         for (int currentAddress = node.getStartAdress();
                 currentAddress < node.getEndAddress(); currentAddress += 4) {
             result += "/* 0x" + Integer.toString(currentAddress, 16) + " */ ";
+            
             result += (int) table.get(currentAddress + OPERATION);
+           //result += String.format("0x%02x", table.get(currentAddress + OPERATION));
 
             if (table.get(currentAddress + OPERATION) == OPT_COMPARE) {
                 result += ", " + (char)table.get(currentAddress + CHARACTER).intValue();
             } else {
                 result += ", " + (int) table.get(currentAddress + CHARACTER);
             }
+            
+            //result += ", " + String.format("0x%02x", table.get(currentAddress + CHARACTER));
 
-            if (table.get(currentAddress + OPERATION) == OPT_FIRST) {
+            if (table.get(currentAddress + OPERATION) == OPT_FIRST || table.get(currentAddress + OPERATION) == OPT_NETWORK) {
                 suffix = "";
             } else {
                 suffix = "0x";
@@ -455,5 +535,13 @@ public class Tree {
             result += ", " + (table.get(currentAddress + ADDR2) != null ? suffix + hexaAddr2 : "NULL") + "\n";
         }
         return result + "\n";
+    }
+
+    private int addPortFrom(int nNode, Rule rule) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private int addPortTo(int nNode, Rule rule) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
