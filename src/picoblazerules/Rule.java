@@ -139,13 +139,22 @@ public class Rule {
     }
     
     private byte[] getIpRange(String ipRange) {
-        byte[] ipFromRange = new byte[8];
+        byte[] result = new byte[8];
         String ip;
         String ipBinary = "";
         String ipBinaryStart = "";
         String ipBinaryEnd = "";
         String subnet;
 
+        if (ipRange.equals("any")) {
+            for (int i = 0; i < 4; i++) {
+                result[i] = (byte) 0;
+            }
+            for (int i = 4; i < 8; i++) {
+                result[i] = (byte) 255;
+            }
+            return result;
+        }
         try {
             if (ipRange.contains("/")) {
                 ip = ipRange.split("/")[0];
@@ -165,20 +174,94 @@ public class Rule {
                     }
                 }
 
-                ipFromRange[0] = (byte) Integer.parseInt(ipBinaryStart.substring(0, 8), 2);
-                ipFromRange[1] = (byte) Integer.parseInt(ipBinaryStart.substring(8, 16), 2);
-                ipFromRange[2] = (byte) Integer.parseInt(ipBinaryStart.substring(16, 24), 2);
-                ipFromRange[3] = (byte) Integer.parseInt(ipBinaryStart.substring(24, 32), 2);
+                result[0] = (byte) Integer.parseInt(ipBinaryStart.substring(0, 8), 2);
+                result[1] = (byte) Integer.parseInt(ipBinaryStart.substring(8, 16), 2);
+                result[2] = (byte) Integer.parseInt(ipBinaryStart.substring(16, 24), 2);
+                result[3] = (byte) Integer.parseInt(ipBinaryStart.substring(24, 32), 2);
 
-                ipFromRange[4] = (byte) Integer.parseInt(ipBinaryEnd.substring(0, 8), 2);
-                ipFromRange[5] = (byte) Integer.parseInt(ipBinaryEnd.substring(8, 16), 2);
-                ipFromRange[6] = (byte) Integer.parseInt(ipBinaryEnd.substring(16, 24), 2);
-                ipFromRange[7] = (byte) Integer.parseInt(ipBinaryEnd.substring(24, 32), 2);
+                result[4] = (byte) Integer.parseInt(ipBinaryEnd.substring(0, 8), 2);
+                result[5] = (byte) Integer.parseInt(ipBinaryEnd.substring(8, 16), 2);
+                result[6] = (byte) Integer.parseInt(ipBinaryEnd.substring(16, 24), 2);
+                result[7] = (byte) Integer.parseInt(ipBinaryEnd.substring(24, 32), 2);
 
+            }
+            else {
+                
+                for (int i = 0; i < 4; i++) {
+                    ipBinary += String.format("%8s", Integer.toBinaryString(Integer.valueOf(ipRange.split("\\.")[i]))).replace(" ", "0");
+                }
+                
+                result[0] = (byte) Integer.parseInt(ipBinary.substring(0, 8), 2);
+                result[1] = (byte) Integer.parseInt(ipBinary.substring(8, 16), 2);
+                result[2] = (byte) Integer.parseInt(ipBinary.substring(16, 24), 2);
+                result[3] = (byte) Integer.parseInt(ipBinary.substring(24, 32), 2);
+
+                result[4] = (byte) Integer.parseInt(ipBinary.substring(0, 8), 2);
+                result[5] = (byte) Integer.parseInt(ipBinary.substring(8, 16), 2);
+                result[6] = (byte) Integer.parseInt(ipBinary.substring(16, 24), 2);
+                result[7] = (byte) Integer.parseInt(ipBinary.substring(24, 32), 2);
+                
+            }
+            
+        } catch (Exception e) {
+        } finally {
+            return result;
+        }
+    }
+
+    byte[] getPortFromRange() {
+        return this.getPortRange(this.sourcesPort);
+    }
+
+    byte[] getPortToRange() {
+        return this.getPortRange(this.destsPort);
+    }
+
+    private byte[] getPortRange(String portRange) {
+        byte[] result = new byte[4];
+        String portStart = "";
+        String portEnd = "";
+        
+        if (portRange.equals("any")) {
+            for (int i = 0; i < 2; i++) {
+                result[i] = (byte) 0;
+            }
+            for (int i = 2; i < 4; i++) {
+                result[i] = (byte) 255;
+            }
+            return result;
+        }
+        try {
+            if (portRange.contains(":")) {
+                portStart = portRange.split(":")[0];
+                portEnd = portRange.split(":")[1];
+                result[0] = this.fillPort(0, Integer.parseInt(portStart));
+                result[1] = this.fillPort(1, Integer.parseInt(portStart));
+                result[2] = this.fillPort(0, Integer.parseInt(portEnd));
+                result[3] = this.fillPort(1, Integer.parseInt(portEnd));
+            }
+            else {
+                result[0] = this.fillPort(0, Integer.parseInt(portRange));
+                result[1] = this.fillPort(1, Integer.parseInt(portRange));
+                result[2] = this.fillPort(0, Integer.parseInt(portRange));
+                result[3] = this.fillPort(1, Integer.parseInt(portRange));
             }
         } catch (Exception e) {
         } finally {
-            return ipFromRange;
+            return result;
         }
     }
+    
+    private byte fillPort(int i, int port) {
+        byte[] result = new byte[2];
+        if (port < 255) {
+            result[0] = (byte) 0;
+            result[1] = (byte) port;
+        } else {
+            result[0] = (byte) (port >> 8);
+            result[1] = (byte) (port & 255);
+        }
+        return result[i];
+    }
+    
 }

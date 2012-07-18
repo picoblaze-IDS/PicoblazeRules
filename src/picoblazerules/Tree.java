@@ -229,9 +229,11 @@ public class Tree {
             nNode = addNextToTable(currentNode, this.table, nNode);
             if (currentNode.getId() > 0)
             {
-                for (Rule rule : rules)
-                    if (rule.getOptions().get(CONTENT).equals(currentNode.getName()))
+                for (Rule rule : rules) {
+                    if (rule.getOptions().get(CONTENT).equals(currentNode.getName())) {
                         nNode = this.addNetworkConfig(nNode, rule);
+                    }
+                }
             }
             nNode = addSuffixToTable(currentNode, this.table, nNode);
             endAddress = nNode;
@@ -538,10 +540,24 @@ public class Tree {
     }
 
     private int addPortFrom(int nNode, Rule rule) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        byte[] portRange = new byte[4];
+        portRange = rule.getPortFromRange();
+        this.table.add(nNode + OPERATION, portRange[0]);
+        this.table.add(nNode + CHARACTER, portRange[1]);
+        this.table.add(nNode + ADDR1, portRange[2]);
+        this.table.add(nNode + ADDR2, portRange[3]);
+        nNode +=4;
+        return (nNode);
     }
 
     private int addPortTo(int nNode, Rule rule) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        byte[] portRange = new byte[4];
+        portRange = rule.getPortToRange();
+        this.table.add(nNode + OPERATION, portRange[0]);
+        this.table.add(nNode + CHARACTER, portRange[1]);
+        this.table.add(nNode + ADDR1, portRange[2]);
+        this.table.add(nNode + ADDR2, portRange[3]);
+        nNode +=4;
+        return (nNode);
     }
 }
