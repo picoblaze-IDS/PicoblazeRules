@@ -23,6 +23,7 @@ public class Rule {
     Map<String, String> options;
     private static final String TCP = "tcp";
     private static final String UDP = "udp";
+    private static final String ICMP = "icmp";
 
     private Rule()
     {
@@ -123,11 +124,15 @@ public class Rule {
     
     public int getProtocolNumber()
     {
-        if (this.protocol.equals(TCP))
+        //http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
+        if (this.protocol.equals(TCP)) {
+            return 6;
+        } else if (this.protocol.equals(UDP)) {
+            return 17;
+        } else if (this.protocol.equals(ICMP)) {
             return 1;
-        else if (this.protocol.equals(UDP))
-            return 2;
-        return 0;
+        }
+        return 255;
     }
     
     public byte[] getIpFromRange() {
