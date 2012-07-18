@@ -227,6 +227,7 @@ public class Tree {
             
             nNode += 4;
             nNode = addNextToTable(currentNode, this.table, nNode);
+            nNode = addSuffixToTable(currentNode, this.table, nNode);
             if (currentNode.getId() > 0)
             {
                 for (Rule rule : rules) {
@@ -235,7 +236,6 @@ public class Tree {
                     }
                 }
             }
-            nNode = addSuffixToTable(currentNode, this.table, nNode);
             endAddress = nNode;
 
             this.nodes.get(key).setStartAdress(startAddress);
