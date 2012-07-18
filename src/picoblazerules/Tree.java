@@ -538,6 +538,36 @@ public class Tree {
         }
         return result + "\n";
     }
+    
+    public String getHexaFormattedTable() {
+        Node currentNode;
+        String result = "";
+
+        for (String key : this.getSortedKeyNodes()) {
+            currentNode = this.nodes.get(key);
+            result += this.getHexaSectionTable(currentNode);
+        }
+        return result;
+    }
+  
+    private String getHexaSectionTable(Node node) {
+        String result = "";
+
+        if (node.getName().equals("")) {
+            result += "// Idle state\n";
+        } else {
+            result += "// state \"" + node.getName() + "\"\n";
+        }
+        for (int currentAddress = node.getStartAdress();
+                currentAddress < node.getEndAddress(); currentAddress += 4) {
+            result += "/* 0x" + Integer.toString(currentAddress, 16) + " */ ";
+            result += String.format("0x%02x", table.get(currentAddress + OPERATION));
+            result += ", " + String.format("0x%02x", table.get(currentAddress + CHARACTER));
+            result += ", " + String.format("0x%02x", table.get(currentAddress + ADDR1));
+            result += ", " + String.format("0x%02x", table.get(currentAddress + ADDR2)) + "\n";
+        }
+        return result + "\n";
+    }
 
     private int addPortFrom(int nNode, Rule rule) {
         byte[] portRange = new byte[4];
