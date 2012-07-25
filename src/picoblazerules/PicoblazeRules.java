@@ -39,6 +39,6 @@ public class PicoblazeRules {
         //System.out.println(tree.getTable());
         //tree.printBinaryTable();
         //System.out.println(tree.getInstructionTable());
-        System.out.println(tree.getVhdlTable());
+        //System.out.println(tree.getVhdlTable());
     }
 }

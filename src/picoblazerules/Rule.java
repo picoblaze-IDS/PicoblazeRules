@@ -240,6 +240,11 @@ public class Rule {
             if (portRange.contains(":")) {
                 portStart = portRange.split(":")[0];
                 portEnd = portRange.split(":")[1];
+                if (Integer.parseInt(portStart) > Integer.parseInt(portEnd))
+                {
+                    portEnd = portRange.split(":")[0];                    
+                    portStart = portRange.split(":")[1];
+                }
                 result[0] = this.fillPort(0, Integer.parseInt(portStart));
                 result[1] = this.fillPort(1, Integer.parseInt(portStart));
                 result[2] = this.fillPort(0, Integer.parseInt(portEnd));
