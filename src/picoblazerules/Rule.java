@@ -4,7 +4,6 @@
  */
 package picoblazerules;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,6 +28,17 @@ public class Rule {
     {
     }
 
+    /**
+     * Rule constructor
+     * @param actions rule actions
+     * @param protocol rule protocol
+     * @param sourcesIp rule source IP
+     * @param sourcesPort rule source port
+     * @param directions rule direction
+     * @param destsIp rule destination IP
+     * @param destsPort rule destination port
+     * @param options rule options
+     */
     public Rule(String actions, String protocol, String sourcesIp, String sourcesPort, String directions, String destsIp, String destsPort, Map<String, String> options) {
         this.actions = actions;
         this.protocol = protocol;
@@ -40,6 +50,9 @@ public class Rule {
         this.options = options;
     }
 
+    /**
+     * Rule debug print
+     */
     public void print()
     {
             System.out.println("[Rules]\n"
@@ -58,70 +71,138 @@ public class Rule {
 
     }
     
+    /**
+     * Get rule actions
+     * @return the rule actions
+     */
     public String getActions() {
         return actions;
     }
 
+    /**
+     * Set rule actions
+     * @param actions the rule actions
+     */
     public void setActions(String actions) {
         this.actions = actions;
     }
 
+    /**
+     * Get rule destination IP
+     * @return the rule destination IP
+     */
     public String getDestsIp() {
         return destsIp;
     }
 
+    /**
+     * Set rule destination IP
+     * @param destsIp the rule destination IP
+     */
     public void setDestsIp(String destsIp) {
         this.destsIp = destsIp;
     }
 
+    /**
+     * Get rule destination port
+     * @return the rule destination port
+     */
     public String getDestsPort() {
         return destsPort;
     }
 
+    /**
+     * Set rule destination port
+     * @param destsPort the rule destination port
+     */
     public void setDestsPort(String destsPort) {
         this.destsPort = destsPort;
     }
 
+    /**
+     * Get rule direction
+     * @return the rule direction
+     */
     public String getDirections() {
         return directions;
     }
 
+    /**
+     * Set rule direction
+     * @param directions the rule direction
+     */
     public void setDirections(String directions) {
         this.directions = directions;
     }
 
+    /**
+     * Get rule options
+     * @return the rule options
+     */
     public Map<String, String> getOptions() {
         return options;
     }
 
+    /**
+     * Set rule options
+     * @param options the rule options
+     */
     public void setOptions(Map<String, String> options) {
         this.options = options;
     }
 
+    /**
+     * Get rule protocol
+     * @return the rule protocol
+     */
     public String getProtocols() {
         return protocol;
     }
 
+    /**
+     * Set rule protocol
+     * @param protocols the rule protocol
+     */
     public void setProtocols(String protocols) {
         this.protocol = protocols;
     }
 
+    /**
+     * Get rule source IP
+     * @return the rule source IP
+     */
     public String getSourcesIp() {
         return sourcesIp;
     }
 
+    /**
+     * Set rule source IP
+     * @param sourcesIp the rule source IP
+     */
     public void setSourcesIp(String sourcesIp) {
         this.sourcesIp = sourcesIp;
     }
 
+    /**
+     * Get rule source port
+     * @return the rule source port
+     */
     public String getSourcesPort() {
         return sourcesPort;
     }
 
+    /**
+     * Set rule source port
+     * @param sourcesPort the rule source port
+     */
     public void setSourcesPort(String sourcesPort) {
         this.sourcesPort = sourcesPort;
     }
     
+    /**
+     * Get rule protocol number
+     * @return the rule protocol number
+     */
     public int getProtocolNumber()
     {
         //http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
@@ -135,14 +216,22 @@ public class Rule {
         return 255;
     }
     
+    /**
+     * Get "IP from" range
+     * @return the "IP from" range
+     */
     public byte[] getIpFromRange() {
         return this.getIpRange(this.sourcesIp);
     }
     
+    /**
+     * Get "IP to" range
+     * @return the "IP to" range
+     */
     public byte[] getIpToRange() {
         return this.getIpRange(this.destsIp);
     }
-    
+
     private byte[] getIpRange(String ipRange) {
         byte[] result = new byte[8];
         String ip;
@@ -214,11 +303,19 @@ public class Rule {
         }
     }
 
-    byte[] getPortFromRange() {
+    /**
+     * Get "port from" range
+     * @return the "port from" range
+     */
+    public byte[] getPortFromRange() {
         return this.getPortRange(this.sourcesPort);
     }
 
-    byte[] getPortToRange() {
+    /**
+     * Set "port to" range
+     * @return the "port to" range
+     */
+    public byte[] getPortToRange() {
         return this.getPortRange(this.destsPort);
     }
 

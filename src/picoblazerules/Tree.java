@@ -35,8 +35,8 @@ public class Tree {
     private static final int OPT_NETWORK = 4; // compare Protocol where 'protocol' is 0 = any, 1 = TCP, 2 = UDP, following by the IP FROM Range (8 Bytes), PORT FROM Range (4 Bytes), IP TO Range(8 Bytes), PORT TO Range(4 Bytes)
 
     /**
-     * 
-     * @param words
+     * Tree constructor
+     * @param rules The list of rules in order to build the tree
      */
     public Tree(ArrayList<Rule> rules) {
         
@@ -65,7 +65,7 @@ public class Tree {
     }
     
     /**
-     * 
+     * Create tree nodes
      */
     private void createNodes()
     {
@@ -77,7 +77,7 @@ public class Tree {
     }
     
     /**
-     * 
+     * Set the node names are in dictionary or not
      */
     private void setNodesDictionary()
     {
@@ -93,7 +93,7 @@ public class Tree {
     }
     
     /**
-     * 
+     * Set the next nodes in the tree
      */
     private void setNodesNext()
     {
@@ -109,7 +109,7 @@ public class Tree {
     }
     
     /**
-     * 
+     * Set the suffix nodes in the tree
      */
     private void setNodesSuffix()
     {
@@ -132,7 +132,7 @@ public class Tree {
     }
     
     /**
-     * 
+     * Print the tree
      */
     public void print()
     {
@@ -153,8 +153,8 @@ public class Tree {
     }
     
     /**
-     * 
-     * @return
+     * Get table
+     * @return a string that represents the tree
      */
     public String getTable()
     {
@@ -202,6 +202,9 @@ public class Tree {
         return result;
     }
     
+    /**
+     * Print binary table
+     */
     public void printBinaryTable()
     {
         for (Byte ch : this.table) {
@@ -387,6 +390,10 @@ public class Tree {
     }
     
     
+    /**
+     * Get formatted table
+     * @return a string that represents the table in a formatted way
+     */
     public String getFormattedTable() {
         Node currentNode;
         String result = "";
@@ -398,6 +405,10 @@ public class Tree {
         return result;
     }
     
+    /**
+     * Get instruction table
+     * @return a string that represents the instructions of the table
+     */
     public String getInstructionTable()
     {
         String result = "";
@@ -436,6 +447,10 @@ public class Tree {
     }
     
     
+    /**
+     * Get VHDL table
+     * @return a string that represents the table as VHDL
+     */
     public String getVhdlTable() {
         String result = "";
         String row = "";
@@ -539,6 +554,10 @@ public class Tree {
         return result + "\n";
     }
     
+    /**
+     * Get hexadecimal formatted table
+     * @return a string that represents the table as hexadecimal
+     */
     public String getHexaFormattedTable() {
         Node currentNode;
         String result = "";

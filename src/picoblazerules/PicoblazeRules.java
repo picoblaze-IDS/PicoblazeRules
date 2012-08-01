@@ -4,9 +4,7 @@
  */
 package picoblazerules;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -15,21 +13,19 @@ import java.util.List;
 public class PicoblazeRules {
     
     /**
-     * @param args the command line arguments
+     * @param args -> rule file path
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         ArrayList<Rule>  rules = new ArrayList<Rule>();
-        String word;
         
         if (args.length == 0)
         {
-            System.out.println("Please specify a rules file.");
+            System.out.println("Please specify a rule file.");
             System.exit(0);
         }
         Parser parser = new Parser(args[0]);
         rules = parser.getRules();
         Tree tree = new Tree(rules);
-        //rule.print();
         
         
 
