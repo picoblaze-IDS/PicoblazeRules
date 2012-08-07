@@ -86,3 +86,17 @@ Convert Snort rules to PicoBlaze instructions using an Aho-Corasick tree.
     INIT_03 => X"901F9210FF01155000011550A0005000FFFFA8C00000A8C0FF00000480000003",
     INIT_04 => X"2000000303000000100000039800650100000000000000038C00680100000000",
     INIT_05 => X"00000000E8046F000100007F0100007F25000C000403020C0403020C11000004"
+    
+## Contact
+    
+    David Carnot
+    dc386@kent.ac.uk
+
+    Jean-Charles Le Goff
+    jcl28@kent.ac.uk
+
+    Valentin Briand
+    vb86@kent.ac.uk
+
+    Michael Bishaey
+    mb551@kent.ac.uk
