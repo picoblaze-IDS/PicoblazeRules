@@ -96,7 +96,7 @@ Convert Snort rules to PicoBlaze instructions using an Aho-Corasick tree.
     jcl28@kent.ac.uk
 
     Valentin Briand
-    vb86@kent.ac.uk
+    vb89@kent.ac.uk
 
     Michael Bishaey
     mb551@kent.ac.uk
